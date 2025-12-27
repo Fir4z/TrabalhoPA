@@ -1,0 +1,445 @@
+#:import AuthLogic __main__.AuthLogic
+#:import FormLogic __main__.FormLogic
+#:import MDTextField kivymd.uix.textfield.MDTextField
+#:import MDRaisedButton kivymd.uix.button.MDRaisedButton
+
+
+WindowManager:
+	FirstWindow:
+	SecondWindow:
+    ThirdWindow:
+    FourthWindow:
+    FifthWindow:
+
+
+<FirstWindow>:
+	name: "first"
+
+
+	MDCard:
+        size_hint: None, None
+        size: 300, 400
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        elevation: 10
+        padding: 25
+        spacing: 25
+        orientation: "vertical"
+
+        MDLabel:
+            id: welcome_label
+            text: "WELCOME"
+            font_size: 40
+            halign: "center"
+            size_hint_y: None
+            height: self.texture_size[1]
+            padding_y: 15
+
+        MDTextField:
+			mode: 'round'
+            id: user
+            hint_text: "username"
+            icon_right: "account"
+            size_hint_x: None
+            width: 200
+            font_size: 18
+            pos_hint: {"center_x": 0.5}
+
+        MDTextField:
+			mode: "round"
+            id: password
+            hint_text: "password"
+            icon_right: "eye-off"
+            size_hint_x: None
+            width: 200
+            font_size: 18
+            pos_hint: {"center_x": 0.5}
+            password: True
+
+        MDRoundFlatButton:
+            text: "LOG IN"
+            font_size: 12
+            pos_hint: {"center_x": 0.5}
+            on_release: 
+				AuthLogic.logger(app)
+
+        MDRoundFlatButton:
+            text: "CLEAR"
+            font_size: 12
+            pos_hint: {"center_x": 0.5} 
+            on_press: 
+				AuthLogic.clear(app)           
+
+        Widget:
+            size_hint_y: None
+            height: 10
+
+
+<SecondWindow>:
+	name: "second"
+
+    cols: 1
+    padding: 25
+    spacing: 20
+
+    MDCard:
+        size_hint: None, None
+        size: 550, 650
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        padding: 25
+        spacing: 20
+        orientation: "vertical"
+        elevation: 10
+        radius: [20,]
+
+        MDLabel:
+            text: "Adicionar Tarefa"
+            halign: "center"
+            font_style: "H4"
+            size_hint_y: None
+            height: self.texture_size[1] + 75
+
+        GridLayout:
+            cols: 2
+            row_default_height: 50
+            row_force_default: True
+            spacing: 20
+            size_hint_y: None
+            height: self.minimum_height
+
+            MDLabel:
+                text: "Descrição: "
+                halign: "right"   
+            MDTextField:
+                id: descricao
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Estado: "
+                halign: "right"
+            Spinner:
+                id: est_spinner
+                text: "Estado"
+                values: ["Por fazer", "Em progresso", "Concluída"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Categoria: "
+                halign: "right"
+            Spinner:
+                id: cat_spinner
+                text: "Pessoal"
+                values: ["Pessoal", "Trabalho", "Estudo"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Prioridade: "
+                halign: "right"
+            Spinner:
+                id: prio_spinner
+                text: "Baixa"
+                height: 50
+                values: ["Baixa", "Média", "Alta"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Notas: "
+                halign: "right"
+            MDTextField:
+                id: nota
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+        MDRaisedButton:
+            text: "Adicionar Tarefa"
+            size_hint_y: None
+            height: 50
+            md_bg_color: app.theme_cls.primary_color
+            on_release: FormLogic.submit(app)
+
+        MDRaisedButton:
+            text: "Voltar"
+            size_hint_y: None
+            pos_hint: {"center_x": 1}
+            md_bg_color: app.theme_cls.primary_color
+            on_release:
+                app.root.current = "third"
+				root.manager.transition.direction = "right"
+                
+
+<ThirdWindow>:
+    name: "third"
+
+    MDCard:
+        
+        size_hint: None, None
+        size: 2000, 1000
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        padding: 25
+        spacing: 20
+        orientation: "vertical"  # Principal em vertical para os buttons e task list
+        elevation: 10
+        radius: [20,]
+
+        # Agr horizontal para os buttons
+        MDBoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            MDRaisedButton:
+                text: "Adicionar"
+                font_size: 20
+                md_bg_color: app.theme_cls.primary_color
+                on_release:
+                    
+                    app.root.current = "second"
+                    root.manager.transition.direction = "right"
+
+            Spinner:
+                id: cate_spinner
+                text: "Ordenar"
+                height: 50
+                values: ["Prioridade", "Data Criação", "Categoria"]
+                size_hint_x: 0.8
+                on_text:
+                    app.ordenar()
+
+                
+
+            MDRaisedButton:
+                text: "Filtrar"
+                font_size: 20
+                md_bg_color: app.theme_cls.primary_color
+                on_release:
+                    app.open_popup_filtrar()
+
+            MDRaisedButton:
+                text: "Mostrar Todas"
+                font_size: 20
+                md_bg_color: app.theme_cls.primary_color
+                on_release: app.atualizar_lista()  
+
+            MDRaisedButton:
+                text: "Exportar Concluidas"
+                font_size: 20
+                md_bg_color: app.theme_cls.primary_color
+                on_release:
+                    app.exportar_concluidas()
+
+        # Scrollable container
+        ScrollView:
+            size_hint: 1, 1  # Ocupa o espaço que falta
+            BoxLayout:
+                id: task_list  # id para adicionar as tarefas
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height  
+
+<FourthWindow>:
+	name: "fourth"
+
+    cols: 1
+    padding: 25
+    spacing: 20
+
+    MDCard:
+        size_hint: None, None
+        size: 550, 650
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        padding: 25
+        spacing: 20
+        orientation: "vertical"
+        elevation: 10
+        radius: [20,]
+
+        MDLabel:
+            text: "Editar Tarefa"
+            halign: "center"
+            font_style: "H4"
+            size_hint_y: None
+            height: self.texture_size[1] + 75
+
+        GridLayout:
+            cols: 2
+            row_default_height: 50
+            row_force_default: True
+            spacing: 20
+            size_hint_y: None
+            height: self.minimum_height
+
+            MDLabel:
+                text: "Descrição: "
+                halign: "right"   
+            MDTextField:
+                id: descricao
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Estado: "
+                halign: "right"
+            Spinner:
+                id: est_spinner
+                values: ["Por fazer", "Em progresso", "Concluída"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Categoria: "
+                halign: "right"
+            Spinner:
+                id: cat_spinner
+                text: "Pessoal"
+                values: ["Pessoal", "Trabalho", "Estudo"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Prioridade: "
+                halign: "right"
+            Spinner:
+                id: prio_spinner
+                text: "Baixa"
+                height: 50
+                values: ["Baixa", "Média", "Alta"]
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Notas: "
+                halign: "right"
+            MDTextField:
+                id: nota
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+        MDRaisedButton:
+            text: "Editar"
+            size_hint_y: None
+            height: 50
+            md_bg_color: app.theme_cls.primary_color
+            on_release: 
+                app.salvar_edicao(root.tarefa_atual)
+                app.root.current = "third"
+				root.manager.transition.direction = "right"
+                
+
+        MDRaisedButton:
+            text: "Voltar"
+            size_hint_y: None
+            pos_hint: {"center_x": 1}
+            md_bg_color: app.theme_cls.primary_color
+            on_release:
+                app.root.current = "third"
+				root.manager.transition.direction = "right"
+                
+
+<FifthWindow>:
+	name: "fifth"
+
+    cols: 1
+    padding: 25
+    spacing: 20
+
+    MDCard:
+        size_hint: None, None
+        size: 550, 650
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        padding: 25
+        spacing: 20
+        orientation: "vertical"
+        elevation: 10
+        radius: [20,]
+
+        MDLabel:
+            id: ID
+            halign: "center"
+            font_style: "H4"
+            size_hint_y: None
+            height: self.texture_size[1] 
+
+        GridLayout:
+            cols: 2
+            row_default_height: 50
+            row_force_default: True
+            spacing: 20
+            size_hint_y: None
+            height: self.minimum_height
+
+            MDLabel:
+                text: "Descrição: "
+                halign: "right"   
+            MDLabel:
+                id: descricao
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Estado: "
+                halign: "right"
+            MDLabel:
+                id: estado
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Categoria: "
+                halign: "right"
+            MDLabel:
+                id: categoria
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Prioridade: "
+                halign: "right"
+            MDLabel:
+                id: prioridade
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Notas: "
+                halign: "right"
+            MDLabel:
+                id: nota
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+            MDLabel:
+                text: "Data de Criação: "
+                halign: "right"
+            MDLabel:
+                id: criacao
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+            
+            MDLabel:
+                text: "Data de Conclusão: "
+                halign: "right"
+            MDLabel:
+                id: conclusao
+                multiline: False
+                mode: "rectangle"
+                size_hint_x: 0.8
+
+        
+
+        MDRaisedButton:
+            text: "Voltar"
+            size_hint_y: None
+            pos_hint: {"center_x": 1}
+            md_bg_color: app.theme_cls.primary_color
+            on_release:
+                app.root.current = "third"
+				root.manager.transition.direction = "right"
+                
