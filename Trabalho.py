@@ -81,23 +81,31 @@ class WindowManager(ScreenManager):
 #Só pa adicionar segurança cifra de césar
 def encrypt(message, key):
     encrypted_message = ""
-    lst = string.ascii_lowercase
-    enc_lst = lst[key:] + lst[:key]
-    for letter in message:
-        letter_index = lst.index(letter)
-        encrypted_message = encrypted_message + enc_lst[letter_index]
+
+    letters = string.ascii_lowercase
+    LETTERS = string.ascii_uppercase
+    digits = string.digits
+
+    key_letters = key % 26
+    key_digits = key % 10
+
+    for char in message:
+        if char in letters:
+            i = letters.index(char)
+            encrypted_message += letters[(i + key_letters) % 26]
+
+        elif char in LETTERS:
+            i = LETTERS.index(char)
+            encrypted_message += LETTERS[(i + key_letters) % 26]
+
+        elif char in digits:
+            i = digits.index(char)
+            encrypted_message += digits[(i + key_digits) % 10]
+
+        else:
+            encrypted_message += char  # mantém espaços e símbolos
+
     return encrypted_message
-
-
-
-def decrypt(encrypted_message, key):
-    decrypted_message = ""
-    lst = string.ascii_lowercase
-    enc_lst = lst[key:] + lst[:key]
-    for letter in encrypted_message:
-        letter_index = enc_lst.index(letter)
-        decrypted_message += lst[letter_index]
-    return decrypted_message
     
 
 
@@ -225,7 +233,7 @@ class TarefaItem(BoxLayout):
 
 
 #Aplicação em si
-class Myapp(MDApp):
+class ToDo(MDApp):
     
     #Necessário para outra funcionar
     def __init__(self, **kwargs):
@@ -553,6 +561,6 @@ class Myapp(MDApp):
 
 #Fim
 if __name__ == "__main__":
-    Myapp().run()
+    ToDo().run()
 
 
