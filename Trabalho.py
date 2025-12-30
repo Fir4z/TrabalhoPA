@@ -33,7 +33,9 @@ from kivy.uix.scrollview import ScrollView
 
 from kivymd.uix.card import MDCard
 
-
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 from kivy.core.window import Window
 
@@ -258,16 +260,63 @@ class ToDo(MDApp):
             json.dump(self.tarefas, f, indent=4, default=str)
 
     #Escreve as concluidas no ficheiro excel
-    def exportar_concluidas(self):
-        concluidas = [t for t in self.tarefas if t["estado"] == "Concluída"]
+    def exportar_concluidas(self, nome_ficheiro="concluidas.xlsx"):
+        concluidas = [t for t in self.tarefas if t.get("estado") == "Concluída"]
+
         if not concluidas:
             self.open_popup("Erro", "Nenhuma tarefa concluída para exportar.")
             return
-        with open("concluidas.csv", "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=concluidas[0].keys())
-            writer.writeheader()
-            writer.writerows(concluidas)
-        self.open_popup("Sucesso", "Tarefas concluídas exportadas para concluidas.csv")
+
+        try:
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Tarefas Concluídas"
+
+            camposc = ["ID","Descrição","Estado","Data de Criação","Data de Conclusão","Prioridade","Categoria","Notas"]
+            campos = list(concluidas[0].keys())
+
+            # Estilos
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="4CAF50", end_color="4CAF50", fill_type="solid")
+            header_align = Alignment(horizontal="center", vertical="center")
+
+            row_fill = PatternFill(start_color="E8F5E9", end_color="E8F5E9", fill_type="solid")
+
+            # Cabeçalho
+            for col, camposc in enumerate(camposc, 1):
+                cell = ws.cell(row=1, column=col, value=camposc)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_align
+
+            # Conteúdo
+            for row, tarefa in enumerate(concluidas, 2):
+                for col, campo in enumerate(campos, 1):
+                    cell = ws.cell(row=row, column=col, value=tarefa.get(campo))
+                    cell.fill = row_fill
+
+            # Ajustar larguras automaticamente
+            for col in range(1, len(campos) + 1):
+                letra = get_column_letter(col)
+                max_len = 0
+                for cell in ws[letra]:
+                    if cell.value:
+                        max_len = max(max_len, len(str(cell.value)))
+                ws.column_dimensions[letra].width = max_len + 10
+
+            # Congelar cabeçalho
+            ws.freeze_panes = "A2"
+
+            # Ativar filtros
+            ws.auto_filter.ref = ws.dimensions
+
+            wb.save(nome_ficheiro)
+
+            self.open_popup("Sucesso", f"Tarefas concluídas exportadas para {nome_ficheiro}")
+
+        # Pa n dar erro
+        except PermissionError:
+            self.open_popup("Erro", "Não foi possível guardar o ficheiro (o ficheiro Excel está aberto?).")
 
 
     #Popup que dá pa meter oq quiser
@@ -304,6 +353,7 @@ class ToDo(MDApp):
         )
         self.dialog.open()
 
+    #Popup confirmação para criar novo user
     def open_popup_confirmacao2(self,file_path,user):
         self.dialog = MDDialog(
             title="Confirmação",
